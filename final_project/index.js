@@ -1,46 +1,38 @@
-const express = require('express');
-const jwt = require('jsonwebtoken');
-const session = require('express-session');
-const customer_routes = require('./router/auth_users.js').authenticated;
-const genl_routes = require('./router/general.js').general;
+const express = require("express");
+const session = require("express-session");
+
+const customer_routes = require("./router/auth_users.js");
+const genl_routes = require("./router/general.js");
 
 const app = express();
 
 app.use(express.json());
 
-// Session middleware for /customer routes
-app.use("/customer", session({
-  secret: "fingerprint_customer",
-  resave: true,
-  saveUninitialized: true
-}));
+// Set up session middleware
+app.use(
+  session({
+    secret: "fingerprint_customer",
+    resave: true,
+    saveUninitialized: true,
+  })
+);
 
-// JWT auth middleware for routes starting with /customer/auth/
+// Middleware to check for valid user session
 app.use("/customer/auth/*", function auth(req, res, next) {
-  const token = req.headers["authorization"];
-
-  if (!token) {
-    return res.status(401).json({ message: "Authorization token missing" });
-  }
-
-  let jwtToken = token;
-  if (token.startsWith("Bearer ")) {
-    jwtToken = token.slice(7);
-  }
-
-  jwt.verify(jwtToken, "access", (err, user) => {
-    if (err) {
-      return res.status(403).json({ message: "Invalid or expired token" });
-    }
-
-    req.user = user;
+  if (req.session.authorization) {
     next();
-  });
+  } else {
+    return res.status(403).json({ message: "User not logged in" });
+  }
 });
+
+// Mount routers
+app.use("/customer", customer_routes.authenticated); // for login, review, etc.
+app.use("/", customer_routes.general);               // for register and general routes
+app.use("/", genl_routes);                           // for book browsing
 
 const PORT = 5000;
 
-app.use("/customer", customer_routes);
-app.use("/", genl_routes);
-
-app.listen(PORT, () => console.log(`Server is running on port ${PORT}`));
+app.listen(PORT, () => {
+  console.log(`Server is running on port ${PORT}`);
+});
