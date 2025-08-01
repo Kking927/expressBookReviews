@@ -1,43 +1,29 @@
-const express = require('express');
-let books = require("./booksdb.js");
-let isValid = require("./auth_users.js").isValid;
-let users = require("./auth_users.js").users;
-const public_users = express.Router();
+const express = require("express");
+const fs = require("fs");
+const router = express.Router();
 
+router.post("/register", (req, res) => {
+  const { username, password } = req.body;
 
-public_users.post("/register", (req,res) => {
-  //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+  if (!username || !password) {
+    return res.status(400).json({ message: "Username and password are required" });
+  }
+
+  let users = [];
+  if (fs.existsSync("users.json")) {
+    const data = fs.readFileSync("users.json", "utf8");
+    users = JSON.parse(data);
+  }
+
+  const existingUser = users.find((user) => user.username === username);
+  if (existingUser) {
+    return res.status(409).json({ message: "User already exists!" });
+  }
+
+  users.push({ username, password });
+
+  fs.writeFileSync("users.json", JSON.stringify(users, null, 2));
+  return res.status(201).json({ message: "Customer successfully registered. Now you can login" });
 });
 
-// Get the book list available in the shop
-public_users.get('/',function (req, res) {
-  //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
-});
-
-// Get book details based on ISBN
-public_users.get('/isbn/:isbn',function (req, res) {
-  //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
- });
-  
-// Get book details based on author
-public_users.get('/author/:author',function (req, res) {
-  //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
-});
-
-// Get all books based on title
-public_users.get('/title/:title',function (req, res) {
-  //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
-});
-
-//  Get book review
-public_users.get('/review/:isbn',function (req, res) {
-  //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
-});
-
-module.exports.general = public_users;
+module.exports = router;
