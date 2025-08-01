@@ -8,10 +8,14 @@ const app = express();
 
 app.use(express.json());
 
-// Use session middleware for customer routes
-app.use("/customer", session({ secret: "fingerprint_customer", resave: true, saveUninitialized: true }));
+// Session middleware for /customer routes
+app.use("/customer", session({
+  secret: "fingerprint_customer",
+  resave: true,
+  saveUninitialized: true
+}));
 
-// Authentication middleware for /customer/auth/* routes
+// JWT auth middleware for routes starting with /customer/auth/
 app.use("/customer/auth/*", function auth(req, res, next) {
   const token = req.headers["authorization"];
 
@@ -19,10 +23,9 @@ app.use("/customer/auth/*", function auth(req, res, next) {
     return res.status(401).json({ message: "Authorization token missing" });
   }
 
-  // Extract token value from Bearer scheme (if used)
   let jwtToken = token;
   if (token.startsWith("Bearer ")) {
-    jwtToken = token.slice(7, token.length);
+    jwtToken = token.slice(7);
   }
 
   jwt.verify(jwtToken, "access", (err, user) => {
@@ -30,7 +33,6 @@ app.use("/customer/auth/*", function auth(req, res, next) {
       return res.status(403).json({ message: "Invalid or expired token" });
     }
 
-    // Attach user info to request object (optional)
     req.user = user;
     next();
   });
