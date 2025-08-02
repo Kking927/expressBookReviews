@@ -63,7 +63,6 @@ public_users.get('/author/:author', async function (req, res) {
             });
             resolve(newBooks);
         }, 3000);
-
         if (Array.isArray(data) && data.length) {
             return res.status(200).json(data);
         }
@@ -73,16 +72,18 @@ public_users.get('/author/:author', async function (req, res) {
     } 
 });
 
-// Get book details by title
-public_users.get('/title/:title', (req, res) => {
-  const title = req.params.title.toLowerCase();
-  let filteredBooks = {};
-
-  for (const [isbn, book] of Object.entries(books)) {
-    if (book.title.toLowerCase() === title) {
-      filteredBooks[isbn] = book;
-    }
-  }
+// Get all books based on title
+public_users.get('/title/:title', async function (req, res) {
+    try {
+        const data = await promiseCb((resolve) => {
+            const title = (req.params.title + "").toLocaleLowerCase();
+            const booksList = Object.values(books);
+            const newBooks = booksList.filter((book) => {
+                book.title.toLowerCase().match(title)
+            );
+            resolve(newBooks);
+        }, 3000);
+        
 
   if (Object.keys(filteredBooks).length > 0) {
     res.send(JSON.stringify(filteredBooks, null, 4));
