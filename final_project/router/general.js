@@ -78,7 +78,7 @@ public_users.get('/title/:title', async function (req, res) {
         const data = await promiseCb((resolve) => {
             const title = (req.params.title + "").toLocaleLowerCase();
             const booksList = Object.values(books);
-            const newBooks = booksList.filter((book) => {
+            const newBooks = booksList.filter((book) =>
                 book.title.toLowerCase().match(title)
             );
             resolve(newBooks);
@@ -86,7 +86,7 @@ public_users.get('/title/:title', async function (req, res) {
         if (Array.isArray(data) && data.length) {
             return res.status(200).json(data);
         }
-        return res.status(404).json({ message: "Invalid author." });
+        return res.status(404).json({ message: "Invalid title." });
     } catch (error) {
         return res.status(500).json({ message: "Internal server error" });
     } 
