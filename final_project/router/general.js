@@ -83,14 +83,15 @@ public_users.get('/title/:title', async function (req, res) {
             );
             resolve(newBooks);
         }, 3000);
-        
-
-  if (Object.keys(filteredBooks).length > 0) {
-    res.send(JSON.stringify(filteredBooks, null, 4));
-  } else {
-    res.status(404).json({ message: "No books found for the given title" });
-  }
+        if (Array.isArray(data) && data.length) {
+            return res.status(200).json(data);
+        }
+        return res.status(404).json({ message: "Invalid author." });
+    } catch (error) {
+        return res.status(500).json({ message: "Internal server error" });
+    } 
 });
+        
 
 // Get book review by ISBN
 public_users.get('/review/:isbn', (req, res) => {
