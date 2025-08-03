@@ -108,7 +108,7 @@ public_users.get('/title/:title', async function (req, res) {
 public_users.get('/review/:isbn', (req, res) => {
   const isbn = req.params.isbn;
   if (books[isbn]) {
-    res.send(books[isbn].review);
+    res.send(books[isbn].reviews);
   } else {
     res.status(404).json({ message: "Book not found" });
   }
