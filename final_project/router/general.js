@@ -39,7 +39,7 @@ public_users.get("/", async function (req, res) {
         const data = await promiseCb((resolve) => {
             const booksList = Object.values(books);
             resolve(booksList);
-    }, 3000);
+        }, 3000);
 
     return res.status(200).json(data);
 } catch (error) {
