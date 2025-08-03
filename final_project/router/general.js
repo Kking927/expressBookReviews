@@ -5,6 +5,18 @@ let users = require("./auth_users.js").users;
 
 const public_users = express.Router();
 
+function promiseCb(cb, timeout = 0) {
+  return new Promise((resolve, reject) => {
+    setTimeout(() => {
+      try {
+        cb(resolve);
+      } catch (err) {
+        reject(err);
+      }
+    }, timeout);
+  });
+}
+
 // Register user
 public_users.post("/register", (req, res) => {
     const { username, password } = req.body;
